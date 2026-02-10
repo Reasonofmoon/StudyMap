@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  level       String   // A1, A2, B1, B2, C1, C2
+  gapData     Json     // 학습 격차 데이터
+  assignments Assignment[]
+  attempts    AssignmentAttempt[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Assignment {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  type        String   // 10가지 유형
+  content     Json     // 문제 내용 (문제, 정답, 해설 등)
+  difficulty  String   // easy, medium, hard
+  status      String   @default("pending") // pending, in_progress, completed, reviewed
+  metadata    Json?    // 추가 메타데이터 (힌트, 시간 등)
+  attempts    AssignmentAttempt[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AssignmentAttempt {
+  id           String   @id @default(cuid())
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      Student @relation(fields: [studentId], references: [id])
+  answer       Json     // 사용자 응답
+  score        Int?     // 점수 (0-100)
+  feedback     Json?    // 피드백 정보
+  timeTaken    Int?     // 소요 시간 (초)
+  completedAt  DateTime @default(now())
+}
+
+// 학습 통계 테이블
+model LearningProgress {
+  id           String   @id @default(cuid())
+  studentId    String
+  level        String   // A1, A2, B1, B2, C1, C2
+  assignmentType String
+  totalAttempts    Int @default(0)
+  correctAnswers   Int @default(0)
+  averageScore     Int @default(0)
+  lastAttemptedAt  DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}

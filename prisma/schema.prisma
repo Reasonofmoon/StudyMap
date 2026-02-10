@@ -1,0 +1,127 @@
+// EduOntology Knowledge Graph Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Core entities
+model Student {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  gaps        Gap[]
+  assignments Assignment[]
+  sessions    LearningSession[]
+}
+
+model Gap {
+  id          String   @id @default(cuid())
+  category    String   // vocabulary, grammar, listening, speaking, reading, writing
+  level       Int      // difficulty level 1-10
+  description String
+  metadata    String? // Additional gap-specific data (JSON string)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  studentId   String
+  student     Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  questions   Question[]
+  sessions    LearningSession[]
+}
+
+model Question {
+  id          String   @id @default(cuid())
+  type        String   // multiple_choice, fill_blank, essay, matching, ordering, etc.
+  content     String
+  options     String? // For multiple choice, matching questions (JSON string)
+  answer      String?
+  explanation String?
+  difficulty  Int      // 1-10 difficulty rating
+  metadata    String? // AI-generated metadata (JSON string)
+  createdAt   DateTime @default(now())
+
+  // Relations
+  gapId       String
+  gap         Gap @relation(fields: [gapId], references: [id], onDelete: Cascade)
+
+  assignmentQuestions AssignmentQuestion[]
+  sessionQuestions SessionQuestion[]
+}
+
+model Assignment {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  metadata    String? // AI-generated assignment metadata (JSON string)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  studentId   String
+  student     Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  assignmentQuestions AssignmentQuestion[]
+  sessions            LearningSession[]
+}
+
+model AssignmentQuestion {
+  id          String   @id @default(cuid())
+  order       Int
+  createdAt   DateTime @default(now())
+
+  // Relations
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  questionId   String
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model LearningSession {
+  id          String   @id @default(cuid())
+  startTime   DateTime @default(now())
+  endTime     DateTime?
+  score       Int?
+  duration    Int?     // Duration in minutes
+
+  // Relations
+  studentId   String
+  student     Student @relation(fields: [studentId], references: [id])
+
+  gapId       String?
+  gap         Gap? @relation(fields: [gapId], references: [id])
+
+  assignmentId String?
+  assignment  Assignment? @relation(fields: [assignmentId], references: [id])
+
+  sessionQuestions SessionQuestion[]
+}
+
+model SessionQuestion {
+  id          String   @id @default(cuid())
+  answer      String?
+  isCorrect   Boolean?
+  timeTaken   Int?     // Time in seconds
+  feedback    String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  sessionId   String
+  session     LearningSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id])
+}
+
+// Neo4j integration will be handled separately through direct Neo4j driver
+// See src/config/database.ts for Neo4j setup

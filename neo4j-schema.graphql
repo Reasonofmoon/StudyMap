@@ -1,0 +1,355 @@
+# EduOntology Neo4j Schema Definition
+
+# Vocabulary Node
+type Vocabulary @node(additionalProperties: false) {
+  id: ID!
+  term: String!
+  definition: String!
+  partOfSpeech: String!
+  difficultyLevel: Int!
+  exampleSentence: String
+  synonyms: [String!]!
+  antonyms: [String!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Relationships
+  appearsIn: [APPEARS_IN!]! @relationship(type: "APPEARS_IN", direction: OUT)
+  prerequisites: [PREREQUISITE!]! @relationship(type: "PREREQUISITE", direction: OUT)
+  requiredBy: [PREREQUISITE!]! @relationship(type: "PREREQUISITE", direction: IN)
+}
+
+# Passage Node
+type Passage @node(additionalProperties: false) {
+  id: ID!
+  title: String!
+  content: String!
+  readingLevel: Int!
+  wordCount: Int!
+  genre: String!
+  topics: [String!]!
+  publishedAt: DateTime!
+  source: String!
+
+  # Relationships
+  vocabularies: [APPEARS_IN!]! @relationship(type: "APPEARS_IN", direction: IN)
+  themes: [APPEARS_IN!]! @relationship(type: "APPEARS_IN", direction: IN)
+}
+
+# Theme Node
+type Theme @node(additionalProperties: false) {
+  id: ID!
+  name: String!
+  description: String!
+  category: String!
+  complexity: Int!
+  keywords: [String!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Relationships
+  appearsInPassages: [APPEARS_IN!]! @relationship(type: "APPEARS_IN", direction: OUT)
+  prerequisites: [PREREQUISITE!]! @relationship(type: "PREREQUISITE", direction: OUT)
+  requiredBy: [PREREQUISITE!]! @relationship(type: "PREREQUISITE", direction: IN)
+}
+
+# APPEARS_IN Relationship
+type APPEARS_IN @relationship(additionalProperties: false) {
+  id: ID!
+  frequency: Int!
+  position: Int!
+  discoveredAt: DateTime!
+
+  # Start and End nodes
+  from: Vocabulary | Theme!
+  to: Passage!
+}
+
+# PREREQUISITE Relationship
+type PREREQUISITE @relationship(additionalProperties: false) {
+  id: ID!
+  relationshipType: String!
+  confidence: Int!
+  mandatory: Boolean!
+  validatedAt: DateTime!
+
+  # Start and End nodes
+  from: Vocabulary | Theme!
+  to: Vocabulary | Theme!
+}
+
+# Composite Types
+type LearningPath {
+  id: ID!
+  startNode: Vocabulary | Theme
+  endNode: Vocabulary | Theme
+  steps: [LearningStep!]!
+  totalDifficulty: Int!
+  estimatedTime: Int!
+}
+
+type LearningStep {
+  currentNode: Vocabulary | Theme
+  nextNode: Vocabulary | Theme
+  relationshipType: String!
+  confidence: Int!
+}
+
+type GapAnalysis {
+  currentNode: Vocabulary | Theme
+  missingPrerequisites: [Vocabulary | Theme!]!
+  recommendedPath: [Vocabulary | Theme!]!
+  gapScore: Int!
+}
+
+# Queries
+type Query {
+  # Vocabulary Queries
+  vocabularies(
+    first: Int = 50
+    skip: Int = 0
+    filter: VocabularyFilter
+    orderBy: VocabularyOrder
+  ): [Vocabulary!]!
+
+  vocabulary(id: ID!): Vocabulary
+
+  # Passage Queries
+  passages(
+    first: Int = 50
+    skip: Int = 0
+    filter: PassageFilter
+    orderBy: PassageOrder
+  ): [Passage!]!
+
+  passage(id: ID!): Passage
+
+  # Theme Queries
+  themes(
+    first: Int = 50
+    skip: Int = 0
+    filter: ThemeFilter
+    orderBy: ThemeOrder
+  ): [Theme!]!
+
+  theme(id: ID!): Theme
+
+  # Relationship Queries
+  learningPath(
+    startNodeId: ID!
+    endNodeId: ID!
+  ): LearningPath
+
+  gapAnalysis(
+    nodeId: ID!
+    targetLevel: Int
+  ): GapAnalysis
+
+  # Analytics Queries
+  layerDistribution: [LayerDistribution!]!
+
+  # Graph Analytics
+  shortestPath(
+    startNodeId: ID!
+    endNodeId: ID!
+  ): [ID!]!
+
+  # Recommendation Engine
+  recommendNextTerms(currentLevel: Int, limit: Int = 10): [Vocabulary!]!
+}
+
+# Mutations
+type Mutation {
+  # Vocabulary Mutations
+  createVocabulary(input: CreateVocabularyInput!): Vocabulary!
+  updateVocabulary(id: ID!, input: UpdateVocabularyInput!): Vocabulary!
+  deleteVocabulary(id: ID!): DeleteResponse!
+
+  # Passage Mutations
+  createPassage(input: CreatePassageInput!): Passage!
+  updatePassage(id: ID!, input: UpdatePassageInput!): Passage!
+  deletePassage(id: ID!): DeleteResponse!
+
+  # Theme Mutations
+  createTheme(input: CreateThemeInput!): Theme!
+  updateTheme(id: ID!, input: UpdateThemeInput!): Theme!
+  deleteTheme(id: ID!): DeleteResponse!
+
+  # Relationship Mutations
+  addPrerequisite(fromNodeId: ID!, toNodeId: ID!, input: CreatePrerequisiteInput!): PREREQUISITE!
+  updatePrerequisite(id: ID!, input: UpdatePrerequisiteInput!): PREREQUISITE!
+  deletePrerequisite(id: ID!): DeleteResponse!
+
+  # Batch Operations
+  importVocabularies(input: [CreateVocabularyInput!]!): ImportResponse!
+  importPassages(input: [CreatePassageInput!]!): ImportResponse!
+  importThemes(input: [CreateThemeInput!]!): ImportResponse!
+}
+
+# Inputs
+input VocabularyFilter {
+  term_contains: String
+  partOfSpeech: PartOfSpeech
+  difficultyLevel_gte: Int
+  difficultyLevel_lte: Int
+}
+
+input PassageFilter {
+  title_contains: String
+  readingLevel_gte: Int
+  readingLevel_lte: Int
+  genre: String
+}
+
+input ThemeFilter {
+  name_contains: String
+  category: String
+  complexity_gte: Int
+  complexity_lte: Int
+}
+
+input VocabularyOrder {
+  field: VocabularyOrderField!
+  direction: OrderDirection!
+}
+
+input PassageOrder {
+  field: PassageOrderField!
+  direction: OrderDirection!
+}
+
+input ThemeOrder {
+  field: ThemeOrderField!
+  direction: OrderDirection!
+}
+
+input CreateVocabularyInput {
+  term: String!
+  definition: String!
+  partOfSpeech: PartOfSpeech!
+  difficultyLevel: Int!
+  exampleSentence: String
+  synonyms: [String!]!
+  antonyms: [String!]!
+}
+
+input UpdateVocabularyInput {
+  term: String
+  definition: String
+  partOfSpeech: PartOfSpeech
+  difficultyLevel: Int
+  exampleSentence: String
+  synonyms: [String!]
+  antonyms: [String!]
+}
+
+input CreatePassageInput {
+  title: String!
+  content: String!
+  readingLevel: Int!
+  wordCount: Int
+  genre: String!
+  topics: [String!]!
+  publishedAt: DateTime!
+  source: String!
+}
+
+input UpdatePassageInput {
+  title: String
+  content: String
+  readingLevel: Int
+  wordCount: Int
+  genre: String
+  topics: [String!]
+}
+
+input CreateThemeInput {
+  name: String!
+  description: String!
+  category: String!
+  complexity: Int!
+  keywords: [String!]!
+}
+
+input UpdateThemeInput {
+  name: String
+  description: String
+  category: String
+  complexity: Int
+  keywords: [String!]
+}
+
+input CreatePrerequisiteInput {
+  relationshipType: PrerequisiteRelationshipType!
+  confidence: Int!
+  mandatory: Boolean!
+}
+
+input UpdatePrerequisiteInput {
+  relationshipType: PrerequisiteRelationshipType
+  confidence: Int
+  mandatory: Boolean
+}
+
+# Enums
+enum PartOfSpeech {
+  NOUN
+  VERB
+  ADJECTIVE
+  ADVERB
+  PREPOSITION
+  CONJUNCTION
+  INTERJECTION
+  PRONOUN
+  DETERMINER
+}
+
+enum OrderDirection {
+  ASC
+  DESC
+}
+
+enum PrerequisiteRelationshipType {
+  PRECEDES
+  REQUIRES
+  ENHANCES
+  COMPLEMENTS
+}
+
+enum VocabularyOrderField {
+  TERM
+  DIFFICULTYLEVEL
+  CREATEDAT
+}
+
+enum PassageOrderField {
+  TITLE
+  READINGLEVEL
+  WORDCOUNT
+  PUBLISHEDAT
+}
+
+enum ThemeOrderField {
+  NAME
+  COMPLEXITY
+  CREATEDAT
+}
+
+# Types
+type DeleteResponse {
+  success: Boolean!
+  message: String!
+}
+
+type ImportResponse {
+  success: Boolean!
+  importedCount: Int!
+  errors: [String!]!
+}
+
+type LayerDistribution {
+  layer: String!
+  vocabularyCount: Int!
+  passageCount: Int!
+  themeCount: Int!
+}

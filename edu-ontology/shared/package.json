@@ -1,0 +1,20 @@
+{
+  "name": "edu-ontology-shared",
+  "version": "1.0.0",
+  "description": "Shared utilities and types for EduOntology platform",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.11.17"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

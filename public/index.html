@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduOntology - AI-Powered Learning Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      background-color: #0F172A;
+      color: white;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .tooltip {
+      position: absolute;
+      padding: 8px;
+      background: #1F2937;
+      border: 1px solid #374151;
+      border-radius: 4px;
+      color: white;
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .word-galaxy-node {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .word-galaxy-node:hover {
+      filter: brightness(1.2);
+    }
+
+    .heatmap-cell {
+      transition: all 0.2s ease;
+    }
+
+    .heatmap-cell:hover {
+      stroke: #60A5FA;
+      stroke-width: 2;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="module">
+    // Mock data for demonstration
+    const mockWordGalaxyData = [
+      { id: '1', word: 'ubiquitous', x: 400, y: 300, radius: 20, group: 'vocabulary', connections: ['2', '3'], difficulty: 6, frequency: 45 },
+      { id: '2', word: 'paradigm', x: 300, y: 200, radius: 18, group: 'vocabulary', connections: ['1', '4'], difficulty: 7, frequency: 32 },
+      { id: '3', word: 'elaborate', x: 500, y: 250, radius: 16, group: 'expression', connections: ['1', '5'], difficulty: 5, frequency: 58 },
+      { id: '4', word: 'subjunctive', x: 200, y: 350, radius: 15, group: 'grammar', connections: ['2', '6'], difficulty: 8, frequency: 28 },
+      { id: '5', word: 'colloquial', x: 450, y: 400, radius: 17, group: 'expression', connections: ['3', '6'], difficulty: 6, frequency: 41 },
+      { id: '6', word: 'idiom', x: 350, y: 450, radius: 19, group: 'idiom', connections: ['4', '5'], difficulty: 4, frequency: 65 }
+    ];
+
+    const mockGapData = [
+      { id: '1', category: 'vocabulary', level: 3, score: 45, frequency: 25, lastReviewed: new Date(), improvement: -5 },
+      { id: '2', category: 'grammar', level: 5, score: 72, frequency: 18, lastReviewed: new Date(), improvement: 12 },
+      { id: '3', category: 'listening', level: 4, score: 58, frequency: 22, lastReviewed: new Date(), improvement: -2 },
+      { id: '4', category: 'speaking', level: 6, score: 83, frequency: 15, lastReviewed: new Date(), improvement: 18 },
+      { id: '5', category: 'reading', level: 5, score: 76, frequency: 20, lastReviewed: new Date(), improvement: 8 },
+      { id: '6', category: 'writing', level: 4, score: 62, frequency: 19, lastReviewed: new Date(), improvement: 3 }
+    ];
+
+    // Simple Word Galaxy implementation
+    class WordGalaxy {
+      constructor(containerId, width, height, data) {
+        this.container = document.getElementById(containerId);
+        this.width = width;
+        this.height = height;
+        this.data = data;
+        this.selectedNode = null;
+
+        this.init();
+      }
+
+      init() {
+        this.container.innerHTML = '';
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', this.width);
+        svg.setAttribute('height', this.height);
+        svg.style.backgroundColor = '#0F172A';
+
+        // Create force simulation
+        const simulation = d3.forceSimulation(this.data)
+          .force('charge', d3.forceManyBody().strength(-300))
+          .force('center', d3.forceCenter(this.width / 2, this.height / 2))
+          .force('collision', d3.forceCollide().radius(d => d.radius + 5))
+          .force('link', d3.forceLink()
+            .id(d => d.id)
+            .links(this.data.flatMap(node =>
+              node.connections.map(targetId => ({ source: node, target: this.data.find(n => n.id === targetId) }))
+            ))
+            .distance(150));
+
+        // Create links
+        const link = svg.append('g')
+          .selectAll('line')
+          .data(this.data.flatMap(node =>
+            node.connections.map(targetId => ({ source: node, target: this.data.find(n => n.id === targetId) }))
+          ))
+          .enter().append('line')
+          .attr('stroke', '#334155')
+          .attr('stroke-opacity', 0.6)
+          .attr('stroke-width', 1);
+
+        // Create nodes
+        const node = svg.append('g')
+          .selectAll('g')
+          .data(this.data)
+          .enter().append('g')
+          .style('cursor', 'pointer')
+          .call(d3.drag()
+            .on('start', (event, d) => {
+              if (!event.active) simulation.alphaTarget(0.3).restart();
+              d.fx = d.x;
+              d.fy = d.y;
+            })
+            .on('drag', (event, d) => {
+              d.fx = event.x;
+              d.fy = event.y;
+            })
+            .on('end', (event, d) => {
+              if (!event.active) simulation.alphaTarget(0);
+              d.fx = null;
+              d.fy = null;
+            }));
+
+        // Add circles
+        node.append('circle')
+          .attr('r', d => d.radius)
+          .attr('fill', d => {
+            const colors = { vocabulary: '#3B82F6', grammar: '#10B981', expression: '#F59E0B', idiom: '#EF4444' };
+            return colors[d.group] || '#6B7280';
+          })
+          .attr('opacity', d => 0.8 + (d.frequency / 100))
+          .on('click', (event, d) => {
+            this.selectedNode = d;
+            this.updateDetails(d);
+          });
+
+        // Add text
+        node.append('text')
+          .text(d => d.word)
+          .attr('text-anchor', 'middle')
+          .attr('dy', '0.35em')
+          .attr('fill', 'white')
+          .attr('font-size', d => Math.max(10, d.radius / 2))
+          .attr('font-weight', '500');
+
+        // Update positions
+        simulation.on('tick', () => {
+          link
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+
+          node.attr('transform', d => `translate(${d.x},${d.y})`);
+        });
+
+        this.container.appendChild(svg);
+      }
+
+      updateDetails(node) {
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'mt-4 p-4 bg-slate-800 rounded-lg border border-gray-700';
+        detailsDiv.innerHTML = `
+          <h4 class="font-semibold text-white mb-2">${node.word}</h4>
+          <div class="grid grid-cols-2 gap-2 text-sm">
+            <div><span class="text-gray-400">Category:</span><span class="text-white ml-2 capitalize">${node.group}</span></div>
+            <div><span class="text-gray-400">Difficulty:</span><span class="text-white ml-2">${node.difficulty}/10</span></div>
+            <div><span class="text-gray-400">Frequency:</span><span class="text-white ml-2">${node.frequency}</span></div>
+            <div><span class="text-gray-400">Connections:</span><span class="text-white ml-2">${node.connections.length}</span></div>
+          </div>
+        `;
+
+        // Replace existing details
+        const existingDetails = this.container.querySelector('.mt-4.p-4');
+        if (existingDetails) {
+          existingDetails.remove();
+        }
+        this.container.appendChild(detailsDiv);
+      }
+    }
+
+    // Simple Gap Heatmap implementation
+    class GapHeatmap {
+      constructor(containerId, width, height, data) {
+        this.container = document.getElementById(containerId);
+        this.width = width;
+        this.height = height;
+        this.data = data;
+
+        this.init();
+      }
+
+      init() {
+        this.container.innerHTML = '';
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', this.width);
+        svg.setAttribute('height', this.height);
+
+        const margin = { top: 60, right: 60, bottom: 80, left: 80 };
+        const innerWidth = this.width - margin.left - margin.right;
+        const innerHeight = this.height - margin.top - margin.bottom;
+
+        const categories = ['vocabulary', 'grammar', 'listening', 'speaking', 'reading', 'writing'];
+        const xScale = d3.scaleBand().domain(categories).range([0, innerWidth]).padding(0.1);
+        const yScale = d3.scaleLinear().domain([1, 10]).range([innerHeight, 0]);
+
+        const colorScale = d3.scaleSequential(d3.interpolateRdYlGn).domain([0, 100]);
+
+        const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+        // Create cells
+        categories.forEach(category => {
+          const categoryData = this.data.filter(d => d.category === category);
+
+          Array(10).fill(null).map((_, level) => {
+            const gap = categoryData.find(d => d.level === level + 1);
+            const cell = g.append('rect')
+              .attr('x', xScale(category))
+              .attr('y', yScale(level + 1))
+              .attr('width', xScale.bandwidth())
+              .attr('height', innerHeight / 10)
+              .attr('fill', gap ? colorScale(gap.score) : '#334155')
+              .attr('stroke', '#1F2937')
+              .attr('stroke-width', 1)
+              .style('cursor', 'pointer')
+              .on('click', () => {
+                if (gap) {
+                  this.showGapDetails(gap);
+                }
+              });
+          });
+        });
+
+        this.container.appendChild(svg);
+      }
+
+      showGapDetails(gap) {
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'mt-4 p-4 bg-slate-800 rounded-lg border border-gray-700';
+        detailsDiv.innerHTML = `
+          <h3 class="text-xl font-bold mb-4 capitalize">${gap.category} - Level ${gap.level}</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h4 class="font-semibold mb-2">Performance</h4>
+              <div class="space-y-2">
+                <div class="flex justify-between"><span>Score:</span><span class="font-bold">${gap.score}%</span></div>
+                <div class="flex justify-between"><span>Frequency:</span><span>${gap.frequency} times</span></div>
+                <div class="flex justify-between"><span>Improvement:</span><span class="${gap.improvement >= 0 ? 'text-green-400' : 'text-red-400'}">${gap.improvement > 0 ? '+' : ''}${gap.improvement}%</span></div>
+              </div>
+            </div>
+            <div>
+              <h4 class="font-semibold mb-2">AI Suggestions</h4>
+              <ul class="text-sm text-gray-300 space-y-1">
+                <li>• Focus on vocabulary building exercises</li>
+                <li>• Review related grammar concepts</li>
+                <li>• Practice with audio materials</li>
+                <li>• Complete 3 practice sessions this week</li>
+              </ul>
+            </div>
+          </div>
+        `;
+
+        const existingDetails = this.container.querySelector('.mt-4.p-4');
+        if (existingDetails) {
+          existingDetails.remove();
+        }
+        this.container.appendChild(detailsDiv);
+      }
+    }
+
+    // Initialize components
+    document.addEventListener('DOMContentLoaded', () => {
+      // Create dashboard structure
+      const root = document.getElementById('root');
+      root.innerHTML = `
+        <div class="min-h-screen bg-slate-900 text-white p-6">
+          <div class="max-w-7xl mx-auto">
+            <header class="mb-8">
+              <h1 class="text-3xl font-bold mb-2">EduOntology Dashboard</h1>
+              <p class="text-gray-400">Personalized learning experience powered by AI</p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div id="word-galaxy-container" class="bg-slate-800 rounded-lg p-4">
+                <h3 class="text-xl font-bold text-white mb-4">Word Galaxy</h3>
+                <div id="word-galaxy"></div>
+              </div>
+
+              <div id="gap-heatmap-container" class="bg-slate-800 rounded-lg p-4">
+                <h3 class="text-xl font-bold text-white mb-4">Experience Gap Heatmap</h3>
+                <div id="gap-heatmap"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Initialize components
+      new WordGalaxy('word-galaxy', 800, 600, mockWordGalaxyData);
+      new GapHeatmap('gap-heatmap', 800, 600, mockGapData);
+    });
+  </script>
+</body>
+</html>

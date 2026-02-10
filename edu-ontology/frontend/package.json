@@ -1,0 +1,32 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "EduOntology Frontend - Interactive vocabulary learning UI",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "d3": "^7.9.0",
+    "@radix-ui/react-tooltip": "^1.1.3",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.3.6"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@types/d3": "^7.4.3",
+    "typescript": "^5.3.3",
+    "vite": "^5.2.11",
+    "vitest": "^1.6.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "@tailwindcss/forms": "^0.5.7"
+  }
+}
