@@ -34,11 +34,10 @@ export interface Neo4jConfig extends Config {
 
 // Default configuration
 const defaultConfig: Neo4jConfig = {
-  url: process.env.NEO4J_URL || 'bolt://localhost:7687',
-  username: process.env.NEO4J_USERNAME || 'neo4j',
-  // Never fall back to a real password. Force explicit configuration.
-  password: process.env.NEO4J_PASSWORD || '',
-  database: process.env.NEO4J_DATABASE || 'eduontology',
+  url: process.env['NEO4J_URL'] || 'bolt://localhost:7687',
+  username: process.env['NEO4J_USERNAME'] || 'neo4j',
+  password: process.env['NEO4J_PASSWORD'] || '',
+  database: process.env['NEO4J_DATABASE'] || 'eduontology',
   connectionPool: {
     maxConnectionPoolSize: isProduction ? 100 : 50,
     connectionAcquisitionTimeout: 30000,
@@ -149,19 +148,19 @@ export const configs = {
   development: validateConfig({
     ...defaultConfig,
     ...getEnvironmentConfig(),
-    url: process.env.NEO4J_URL_DEV || 'bolt://localhost:7687',
+    url: process.env['NEO4J_URL_DEV'] || 'bolt://localhost:7687',
   }),
 
   production: validateConfig({
     ...defaultConfig,
     ...getEnvironmentConfig(),
-    url: process.env.NEO4J_URL_PROD || 'bolt://prod-cluster:7687',
+    url: process.env['NEO4J_URL_PROD'] || 'bolt://prod-cluster:7687',
   }),
 
   test: validateConfig({
     ...defaultConfig,
     ...getEnvironmentConfig(),
-    url: process.env.NEO4J_URL_TEST || 'bolt://test-localhost:7687',
+    url: process.env['NEO4J_URL_TEST'] || 'bolt://test-localhost:7687',
     database: 'eduontology-test',
   }),
 }

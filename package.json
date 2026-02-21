@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "EduOntology Core Engine - AI-Powered Learning Platform",
   "main": "dist/index.js",
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "scripts": {
     "dev": "npm run dev:engine",
     "dev:engine": "tsx watch src/index.ts",
@@ -16,6 +19,7 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
     "neo4j:setup": "tsx scripts/setup-neo4j.ts",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
