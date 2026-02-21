@@ -1,0 +1,52 @@
+# Agent Team Configuration for Antigravity Prime
+# Lead: Coordinator (does not write code, only assigns and reviews)
+
+team:
+  name: "Antigravity Prime Team"
+  lead: "coordinator"
+  mode: "delegate"  # Lead does NOT write code
+
+  agents:
+    architect:
+      model: "sonnet"
+      require_plan_approval: true
+      directory: ".team/agents/architect"
+      role: "System Architect"
+
+    builder-1:
+      model: "sonnet"
+      directory: ".team/agents/builder-1"
+      role: "Primary Builder"
+
+    builder-2:
+      model: "sonnet"
+      directory: ".team/agents/builder-2"
+      role: "Secondary Builder"
+
+    tester:
+      model: "haiku"
+      directory: ".team/agents/tester"
+      role: "QA Specialist"
+
+    devops:
+      model: "haiku"
+      directory: ".team/agents/devops"
+      role: "Infrastructure Specialist"
+
+shared_resources:
+  memory: ".team/memory/"
+  skills: ".team/skills/common/"
+  project_root: "CLAUDE.md"
+
+coordination:
+  method: "message"  # Use message for specific agents, broadcast sparingly
+  quality_gates:
+    - typecheck
+    - lint
+    - tests
+  file_ownership:
+    architect: ["Architecture/", "design/", "plans/"]
+    builder-1: ["src/", "components/", "lib/"]
+    builder-2: ["api/", "utils/", "helpers/"]
+    tester: ["tests/", "__tests__/"]
+    devops: [".github/", "docker/", "infra/"]

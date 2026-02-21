@@ -34,11 +34,13 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get('/health', async (_req, res) => {
   try {
-    await prisma.$executeRaw`SELECT 1`;
+    // SQLite: use $queryRawUnsafe for SELECT (returns results)
+    await prisma.$queryRawUnsafe('SELECT 1 AS ok');
     return res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      environment: env.NODE_ENV
+      environment: env.NODE_ENV,
+      note: 'Neo4j is optional — graph features degrade gracefully when unavailable'
     });
   } catch (error) {
     return res.status(503).json({

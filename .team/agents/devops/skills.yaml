@@ -1,0 +1,24 @@
+skills:
+  - name: "CI/CD Pipeline"
+    description: "GitHub Actions, GitLab CI, Jenkins automation"
+    usage: "Set up automated build, test, and deployment pipelines"
+
+  - name: "Containerization"
+    description: "Docker, Docker Compose, Kubernetes"
+    usage: "Containerize applications and manage orchestration"
+
+  - name: "Cloud Infrastructure"
+    description: "AWS, GCP, Azure, Vercel, Railway"
+    usage: "Manage cloud resources and services"
+
+  - name: "Database Administration"
+    description: "PostgreSQL, Neo4j, migrations, backups"
+    usage: "Manage database infrastructure and operations"
+
+  - name: "Monitoring & Observability"
+    description: "Prometheus, Grafana, logging, alerting"
+    usage: "Monitor application performance and health"
+
+  - name: "Security & Compliance"
+    description: "SSL/TLS, firewall, security scanning"
+    usage: "Ensure security best practices and compliance"

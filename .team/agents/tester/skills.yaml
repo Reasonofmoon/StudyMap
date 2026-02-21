@@ -1,0 +1,24 @@
+skills:
+  - name: "Unit Testing"
+    description: "Jest, React Testing Library, mocking"
+    usage: "Write unit tests for components and functions"
+
+  - name: "Integration Testing"
+    description: "API testing, database integration, E2E"
+    coverage: "Test component interactions and data flow"
+
+  - name: "Performance Testing"
+    description: "Load testing, benchmarking, profiling"
+    usage: "Test application performance under load"
+
+  - name: "Security Testing"
+    description: "Penetration testing, vulnerability scanning"
+    usage: "Identify and test security vulnerabilities"
+
+  - name: "Accessibility Testing"
+    description: "WCAG compliance, screen reader testing"
+    usage: "Ensure applications are accessible to all users"
+
+  - name: "Test Coverage Analysis"
+    description: "Coverage reports, gap analysis"
+    usage: "Analyze test coverage and identify gaps"

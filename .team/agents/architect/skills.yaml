@@ -1,0 +1,24 @@
+skills:
+  - name: "System Architecture"
+    description: "Design scalable, maintainable system architectures"
+    usage: "Create overall system architecture and component design"
+
+  - name: "Database Design"
+    description: "Design relational and graph database schemas"
+    usage: "Plan database structure and relationships"
+
+  - name: "API Design"
+    description: "Design RESTful and GraphQL APIs"
+    usage: "Create API specifications and endpoint design"
+
+  - name: "Performance Optimization"
+    description: "Identify and resolve performance bottlenecks"
+    usage: "Optimize system performance and scalability"
+
+  - name: "Security Architecture"
+    description: "Design secure authentication and authorization"
+    usage: "Plan security measures and access control"
+
+  - name: "Technology Selection"
+    description: "Choose appropriate technologies for projects"
+    usage: "Evaluate and select technology stacks"

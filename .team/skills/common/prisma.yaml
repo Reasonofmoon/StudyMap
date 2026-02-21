@@ -1,0 +1,16 @@
+skills:
+  - name: "Prisma Schema Design"
+    description: "Design database schemas with relations"
+    usage: "Create and manage database schema files"
+
+  - name: "Database Queries"
+    description: "Type-safe database queries with Prisma"
+    usage: "Query databases safely with TypeScript"
+
+  - name: "Migration Management"
+    description: "Create and apply database migrations"
+    usage: "Version control for database schema changes"
+
+  - name: "Data Modeling"
+    description: "Design relational and graph data models"
+    usage: "Structure data for optimal performance"

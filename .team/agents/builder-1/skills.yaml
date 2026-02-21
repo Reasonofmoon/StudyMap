@@ -1,0 +1,24 @@
+skills:
+  - name: "React Development"
+    description: "Expert in React hooks, components, and patterns"
+    usage: "Build modern React applications with TypeScript"
+
+  - name: "Next.js"
+    description: "Next.js App Router, SSR, SSG, API routes"
+    usage: "Develop full-stack Next.js applications"
+
+  - name: "UI/UX Implementation"
+    description: "Convert designs to responsive, accessible UIs"
+    usage: "Implement user interfaces with best practices"
+
+  - name: "State Management"
+    description: "React Context, Redux, custom hooks"
+    usage: "Manage application state efficiently"
+
+  - name: "Authentication"
+    description: "NextAuth.js, JWT, OAuth integration"
+    usage: "Implement secure authentication flows"
+
+  - name: "Testing"
+    description: "React Testing Library, Jest, unit tests"
+    usage: "Write tests for React components"

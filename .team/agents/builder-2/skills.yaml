@@ -1,0 +1,24 @@
+skills:
+  - name: "Node.js Development"
+    description: "Express.js, middleware, routing, error handling"
+    usage: "Build robust Node.js APIs and applications"
+
+  - name: "Database Integration"
+    description: "Prisma, PostgreSQL, Neo4j, SQL queries"
+    usage: "Integrate and manage databases efficiently"
+
+  - name: "API Development"
+    description: "RESTful design, GraphQL, OpenAPI specs"
+    usage: "Develop and document APIs"
+
+  - name: "Data Validation"
+    description: "Zod, Joi, input sanitization, schema design"
+    usage: "Validate and sanitize user inputs"
+
+  - name: "Security"
+    description: "JWT, OAuth, CORS, rate limiting"
+    usage: "Implement security measures and authentication"
+
+  - name: "Testing"
+    description: "Jest, Supertest, integration tests"
+    usage: "Write tests for APIs and backend logic"

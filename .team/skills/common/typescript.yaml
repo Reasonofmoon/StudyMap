@@ -1,0 +1,16 @@
+skills:
+  - name: "TypeScript Expert"
+    description: "TypeScript type definitions, interfaces, generics"
+    usage: "Use for all type definitions and type safety"
+
+  - name: "React Hooks"
+    description: "useState, useEffect, useContext, custom hooks"
+    usage: "State management and side effects in React components"
+
+  - name: "Component Design"
+    description: "Functional components with TypeScript"
+    usage: "Create reusable, type-safe React components"
+
+  - name: "API Integration"
+    description: "Fetch API, axios, error handling"
+    usage: "Connect frontend to backend APIs"

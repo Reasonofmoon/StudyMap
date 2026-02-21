@@ -15,6 +15,15 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
+# Database files — NEVER commit
+*.db
+*.sqlite
+prisma/dev.db
+prisma/dev.db-journal
+
+# Build output
+*.tsbuildinfo
+
 # Local agent configs
 .claude/
 
